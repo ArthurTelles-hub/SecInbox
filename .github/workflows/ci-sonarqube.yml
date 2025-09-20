@@ -1,21 +1,46 @@
-name: SonarQube Scan (Local)
+name: Análise de Código da API
 
+# Este fluxo de trabalho será executado em cada push para o branch 'main'
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
-  sonarqube:
-    runs-on: self-hosted  
-
+  sonarcloud:
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout do Código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Análise de branch e pull request
+          
+      - name: Configurar o Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
 
-      - name: SonarQube Scan
+      - name: Configurar o Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Instalar Dependências do Python
+        working-directory: ./server
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+          
+      - name: Análise com SonarScanner
         uses: SonarSource/sonarqube-scan-action@master
+        with:
+          # A propriedade projectBaseDir precisa apontar para a pasta que contém o código a ser analisado
+          projectBaseDir: ./server
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}   
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: http://localhost:9000
