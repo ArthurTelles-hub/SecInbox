@@ -1,0 +1,57 @@
+name: Análise de Código da API
+
+# Este fluxo de trabalho será executado em cada push e pull request no branch 'main'
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  sonarcloud:
+    runs-on: ubuntu-latest
+    
+    # Inicia um contêiner Docker do SonarQube como um serviço para a análise
+    services:
+      sonarqube:
+        image: sonarqube:latest
+        ports:
+          - 9000:9000
+        # Desabilita a verificação de inicialização para facilitar a integração no CI
+        env:
+          SONAR_ES_BOOTSTRAP_CHECKS_DISABLED: true
+    
+    steps:
+      - name: Checkout do Código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Análise de branch e pull request
+          
+      - name: Configurar o Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Configurar o Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Instalar Dependências do Python
+        working-directory: ./server
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+          
+      - name: Análise com SonarScanner
+        uses: SonarSource/sonarqube-scan-action@master
+        with:
+          # A propriedade projectBaseDir precisa apontar para a pasta que contém o código a ser analisado
+          projectBaseDir: ./server
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: http://sonarqube:9000 # O nome do serviço é o host acessível
