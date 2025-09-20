@@ -12,6 +12,17 @@ on:
 jobs:
   sonarcloud:
     runs-on: ubuntu-latest
+    
+    # Inicia um contêiner Docker do SonarQube como um serviço para a análise
+    services:
+      sonarqube:
+        image: sonarqube:latest
+        ports:
+          - 9000:9000
+        # Desabilita a verificação de inicialização para facilitar a integração no CI
+        env:
+          SONAR_ES_BOOTSTRAP_CHECKS_DISABLED: true
+
     steps:
       - name: Checkout do Código
         uses: actions/checkout@v4
@@ -43,4 +54,4 @@ jobs:
           projectBaseDir: ./server
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: http://localhost:9000
+          SONAR_HOST_URL: http://sonarqube:9000 # O nome do serviço é o host acessível
