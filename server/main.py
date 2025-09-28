@@ -45,7 +45,7 @@ api.register_blueprint(StatusBlueprint)
 
 @app.errorhandler(429)
 def ratelimit_handler(e):
-    return jsonfy({
+    return jsonify({
         "message": "Limite de requisições atingido, tente mais tarde.",
         "limit_info": str(e.description)
     }), 429
