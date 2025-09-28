@@ -1,5 +1,6 @@
 Flask==3.0.2
 Flask-Smorest==0.46.1
+Flask-Limiter==3.13
 marshmallow==4.0.1
 python-whois==0.9.5
 requests==2.32.4
