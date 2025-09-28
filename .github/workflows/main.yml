@@ -1,57 +1,45 @@
-name: Análise de Código da API
+name: CI with SonarQube
 
-# Este fluxo de trabalho será executado em cada push e pull request no branch 'main'
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
   pull_request:
-    branches:
-      - main
+    branches: [ "main" ]
 
 jobs:
-  sonarcloud:
+  build:
     runs-on: ubuntu-latest
-    
-    # Inicia um contêiner Docker do SonarQube como um serviço para a análise
+
     services:
       sonarqube:
-        image: sonarqube:latest
+        image: sonarqube:community
         ports:
           - 9000:9000
-        # Desabilita a verificação de inicialização para facilitar a integração no CI
-        env:
-          SONAR_ES_BOOTSTRAP_CHECKS_DISABLED: true
-    
+        options: >-
+          --health-cmd="curl -f http://localhost:9000/api/system/health || exit 1"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=30
+
     steps:
-      - name: Checkout do Código
+      - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Análise de branch e pull request
-          
-      - name: Configurar o Java
+
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: temurin
+          java-version: 21
 
-      - name: Configurar o Python
-        uses: actions/setup-python@v5
+      - name: Install Sonar Scanner
+        uses: sonarsource/sonarcloud-github-action@master
         with:
-          python-version: '3.10'
+          version: 7.2.0.5079
 
-      - name: Instalar Dependências do Python
-        working-directory: ./server
+      - name: Run SonarQube Scanner
         run: |
-          python -m venv venv
-          source venv/bin/activate
-          pip install -r requirements.txt
-          
-      - name: Análise com SonarScanner
-        uses: SonarSource/sonarqube-scan-action@master
-        with:
-          # A propriedade projectBaseDir precisa apontar para a pasta que contém o código a ser analisado
-          projectBaseDir: ./server
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: http://sonarqube:9000 # O nome do serviço é o host acessível
+          sonar-scanner \
+            -Dsonar.projectKey=SeuProjeto \
+            -Dsonar.sources=./server \
+            -Dsonar.host.url=http://localhost:9000 \
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
