@@ -1,3 +1,4 @@
+from flask import Flask, jsonify
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort 
 from schemas import CheckerSchema
