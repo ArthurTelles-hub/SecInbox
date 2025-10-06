@@ -1,29 +1,27 @@
-from flask import Flask, jsonify
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort 
-from schemas import CheckerSchema
+from marshmallow import fields
+from schemas import SimpleBatchCheckerSchema, PhishingResponseSchema
+from phishing_logic import analisar_texto
 
-from ..phishing_logic import analisar_texto
-
-# Cria um Blueprint para as rotas de verificação de segurança
 blp = Blueprint("SecurityChecker", __name__, url_prefix="/analisar", description="Endpoints para verificação de segurança")
 
 # Endpoint para analisar texto, URLs ou e-mails
 @blp.route("/", methods=["POST"])
 class AnalisarResource(MethodView):
-    # Nota: O decorador @blp.arguments(CheckerSchema) já injeta os dados validados no 'analise_data'
-    @blp.arguments(CheckerSchema)
-    def post(self, analise_data):
-        input_text = analise_data.get("texto")
-        input_type = analise_data.get("tipo")
-        
-        # Validar tipos aceitos para segurança
-        if input_type.lower() not in ["url", "email"]:
-            # Usar 'abort' do Flask-Smorest para tratamento de erro padronizado
-            abort(400, message="Tipo de análise inválido. Use 'url' ou 'email'.")
+    @blp.arguments(SimpleBatchCheckerSchema)
+    @blp.response(200, fields.List(fields.Nested(PhishingResponseSchema)))
+    def post(self, batch_data):
+        input_type = batch_data.get("tipo_geral", "url").lower()
+        input_list = batch_data.get("lista_itens", [])
 
-        # 1. Chama a função do pacote modularizado
-        resultado = analisar_texto(input_text, tipo=input_type)
+        resultados_finais = []
+
+        if input_type in input_list:
+            abort(400,message="O campo tipo_geral deve ser 'url' ou 'email'.")
         
-        # 2. Retorna o dicionário, deixando o Flask-Smorest/Flask lidar com a conversão JSON
-        return resultado
+        for input_text in input_list:
+            resultado = analisar_texto(input_text, tipo=input_type)
+            resultados_finais.append(resultado)
+        
+        return resultados_finais
