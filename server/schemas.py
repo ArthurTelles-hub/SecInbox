@@ -1,9 +1,13 @@
 from marshmallow import Schema, fields
-from marshmallow.validate import OneOf
 
-class ChatResponseSchema(Schema):
-    response = fields.String(required=True)
+class PhishingResponseSchema(Schema):
+    suspicious = fields.Bool(required=True, metadata={"description": "Verdadeiro se houver indícios de phishing."})
+    reason = fields.Str(required=True, metadata={"description": "Detalhes dos indicadores encontrados."})
 
-class CheckerSchema(Schema):
-    texto = fields.String(required=True)
-    tipo = fields.String(required=True, validate=OneOf(["url", "email"]))
+class SimpleBatchCheckerSchema(Schema):
+    tipo_geral = fields.Str(required=True, metadata={"description": "Tipo de análise aplicado a todos os itens: 'url' ou 'email'."})
+    lista_itens = fields.List(
+        fields.Str(), 
+        required=True, 
+        metadata={"description": "Lista de URLs ou endereços de e-mail para análise."}
+    )
