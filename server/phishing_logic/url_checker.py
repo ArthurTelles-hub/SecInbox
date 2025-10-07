@@ -29,7 +29,7 @@ def verificar_dominio_recente(dominio: str) -> str | None:
                 
             if isinstance(criacao, datetime):
                 dias = (datetime.now() - criacao).days
-                if dias < 180:
+                if dias < 90:
                     return f"Domínio registrado recentemente ({dias} dias atrás)"
                 
     except whois.parser.PywhoisError:
