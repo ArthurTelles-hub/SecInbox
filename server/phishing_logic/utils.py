@@ -19,3 +19,13 @@ def expandir_url(url_encurtada: str) -> str | None:
         return r.ulr
     except requests.exceptions.RequestException:
         return None
+    
+def verificar_palavras_chave(texto: str, palavras_suspeitas: list[str]) -> str | None:
+    if any(p in texto.lower() for p in palavras_suspeitas):
+        return "Contém palavras suspeitas" 
+    return None
+
+def verificar_tld_suspeito(dominio: str, tlds_suspeitos: list[str]) -> str | None:
+    if any(dominio.endswith(tld) for tld in tlds_suspeitos):
+        return "Domínio de nível superio (TLD) suspeito ou incomum"
+    return None
