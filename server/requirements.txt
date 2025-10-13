@@ -5,3 +5,4 @@ marshmallow==4.0.1
 python-whois==0.9.5
 requests==2.32.4
 python-dotenv==1.1.1
+levenshtein==0.27.1
