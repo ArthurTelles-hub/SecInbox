@@ -1,5 +1,8 @@
-from .utils import carregar_lista
-from .url_checker import verificar_tld_suspeito, verificar_palavras_chave
+from utils import (
+    verificar_palavras_chave, 
+    verificar_tld_suspeito, 
+    carregar_lista
+)
 
 def _validar_formato(email:str) -> tuple[str | None, str | None] | dict:
     try:
