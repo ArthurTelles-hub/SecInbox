@@ -1,4 +1,4 @@
-from utils import (
+from .utils import (
     verificar_palavras_chave, 
     verificar_tld_suspeito, 
     carregar_lista
