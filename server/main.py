@@ -34,7 +34,7 @@ limiter = Limiter(
     app=app,
     key_func=get_remote_address,
     # A regra vale para todos os endpoints sem um limite próprio definido
-    default_limits=["100 per minute"]
+    default_limits=["1000 per minute"]
 ) 
 
 api = Api(app)
