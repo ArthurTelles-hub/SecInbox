@@ -2,7 +2,11 @@ import whois
 from urllib.parse import urlparse
 from datetime import datetime
 import time
-import utils
+from .utils import (
+    verificar_palavras_chave, 
+    verificar_tld_suspeito, 
+    carregar_lista
+)
 
 def verificar_dominio_recente(dominio: str) -> str | None:
     time.sleep(1.0)
@@ -46,9 +50,9 @@ def verificar_parametros_longos(url: str) -> str | None:
     return None
 
 def analisar_url(url: str) -> dict:
-    palavras_suspeitas = utils.carregar_lista("palavras_suspeitas.txt")
-    tlds_suspeitos = utils.carregar_lista("tlds_suspeitos.txt")
-    encurtadores = utils.carregar_lista("encurtadores.txt")
+    palavras_suspeitas = carregar_lista("palavras_suspeitas.txt")
+    tlds_suspeitos = carregar_lista("tlds_suspeitos.txt")
+    encurtadores = carregar_lista("encurtadores.txt")
 
     heuristicas = []
 
@@ -57,8 +61,8 @@ def analisar_url(url: str) -> dict:
         dominio = parsed.netloc.lower()
 
         verficacoes = [
-            utils.verificar_palavras_chave(url, palavras_suspeitas),
-            utils.verificar_tld_suspeito(url, tlds_suspeitos),
+            verificar_palavras_chave(url, palavras_suspeitas),
+            verificar_tld_suspeito(url, tlds_suspeitos),
             verificar_dominio_recente(dominio),
             verificar_encurtadores(url, dominio, encurtadores),
             verificar_parametros_longos(url),
