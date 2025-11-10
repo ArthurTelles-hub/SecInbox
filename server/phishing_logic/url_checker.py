@@ -16,32 +16,30 @@ def verificar_whitelist(dominio: str, whitelist: list[str]) -> bool:
     for item in whitelist:
         item = item.lower()
 
-        if dominio == item:
+        if dominio == item or dominio.endswith(f".{item}"):
             return True
-
-        if dominio.endswith(f".{item}"):
-            return True
-            
     return False
 
+
 def analisar_url(url: str) -> dict:
-    heuristicas = []
-
-    palavras_suspeitas = carregar_lista("palavras_suspeitas.txt")
-    tlds_suspeitos = carregar_lista("tlds_suspeitos.txt")
-    encurtadores = carregar_lista("encurtadores.txt")
-    whitelist = carregar_lista("whitelist.txt")
-
-    try: 
+    try:
         parsed = urlparse(url)
         dominio = parsed.netloc.lower()
-        
+
         if not dominio:
-             return {"suspicious": True, "reason": "URL inválida ou sem domínio"}
+            return {"suspicious": True, "reason": "URL inválida ou sem domínio"}
+
+        whitelist = carregar_lista("whitelist.txt")
 
         if verificar_whitelist(dominio, whitelist):
             return {"suspicious": False, "reason": "Domínio na lista branca (Whitelist)"}
-            
+
+        palavras_suspeitas = carregar_lista("palavras_suspeitas.txt")
+        tlds_suspeitos = carregar_lista("tlds_suspeitos.txt")
+        encurtadores = carregar_lista("encurtadores.txt")
+
+        heuristicas = []
+
         verificacoes = [
             verificar_palavras_chave(url, palavras_suspeitas),
             verificar_tld_suspeito(dominio, tlds_suspeitos),
@@ -58,6 +56,6 @@ def analisar_url(url: str) -> dict:
             return {"suspicious": True, "reason": "; ".join(heuristicas)}
         else:
             return {"suspicious": False, "reason": "Nenhum indicador de phishing encontrado"}
-        
+
     except Exception as e:
         return {"suspicious": True, "reason": f"Erro fatal ao processar a URL: {str(e)}"}
