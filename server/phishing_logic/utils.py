@@ -53,9 +53,7 @@ def verificar_dominio_recente(dominio: str, dias_limite: int = 30) -> str | None
 def verificar_encurtadores(url: str, dominio: str, encurtadores: list[str], expandir_url_func) -> str | None:
     dominio = dominio.lower()
 
-    # Verifica se o domínio faz parte da lista de encurtadores conhecidos
     if any(encurtador in dominio for encurtador in encurtadores):
-        # Tenta expandir a URL
         expandida = expandir_url_func(url)
 
         if expandida:
@@ -74,11 +72,9 @@ def verificar_parametros_longos(url: str, limite_tamanho: int = 100, limite_para
         if not params:
             return None
 
-        # Verifica quantidade total de parâmetros
         if len(params) > limite_parametros:
             return f"Quantidade suspeita de parâmetros ({len(params)})"
 
-        # Verifica se algum valor de parâmetro é muito longo
         for key, values in params.items():
             for value in values:
                 if len(value) > limite_tamanho:
