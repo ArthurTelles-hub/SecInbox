@@ -46,7 +46,6 @@ v.ht
 durl.me
 deck.gl
 zz.am
-gfycat.com
 x.gd
 vk.cc
 y.ahoo.it
@@ -60,7 +59,6 @@ cutt.us
 do.co
 flic.kr
 gph.is
-gr8.com
 hubs.ly
 l.link
 ly.gd
@@ -119,7 +117,6 @@ zl.gl
 7f.in
 ab.co
 al.ly
-al.ly
 al.li
 alturl.com
 ap.pn
@@ -129,7 +126,6 @@ bce.li
 bho.st
 bif.is
 bil.ly
-bit.ly
 bl.ly
 box.com
 c4.to
@@ -226,7 +222,6 @@ yell.to
 zix.cc
 zurl.co
 0rz.co
-1url.com
 4h.net
 4ms.me
 aurl.ws
