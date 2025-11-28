@@ -1,70 +1,48 @@
 import os
-import requests
-from urllib.parse import urlparse
-import datetime
-import whois
+from urllib.parse import urlparse, parse_qs
+from typing import List, Optional
+from datetime import datetime
+import re
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
 
-def carregar_lista(nome_arquivo: str) -> list[str]:
+def carregar_lista(nome_arquivo: str) -> List[str]:
     caminho = os.path.join(DATA_DIR, nome_arquivo)
     try:
         with open(caminho, "r", encoding="utf-8") as f:
-            return [linha.strip().lower() for linha in f if linha.strip()]
+            return [linha.strip().lower() for linha in f if linha.strip() and not linha.strip().startswith('#')]
     except FileNotFoundError:
+        return []
+    except Exception:
         print(f"ATENÇÂO: Arquivo de lista não encontrado em {caminho}")
         return []
     
-def expandir_url(url_encurtada: str) -> str | None:
-    try:
-        r = requests.head(url_encurtada, allow_redirects=True, timeout=5)
-        return r.ulr
-    except requests.exceptions.RequestException:
-        return None
-    
-def verificar_palavras_chave(texto: str, palavras_suspeitas: list[str]) -> str | None:
+def verificar_palavras_chave(texto: str, palavras_suspeitas: List[str]) -> Optional[str]:
     if any(p in texto.lower() for p in palavras_suspeitas):
         return "Contém palavras suspeitas" 
     return None
 
-def verificar_tld_suspeito(dominio: str, tlds_suspeitos: list[str]) -> str | None:
-    if any(dominio.endswith(tld) for tld in tlds_suspeitos):
-        return "Domínio de nível superio (TLD) suspeito ou incomum"
+def verificar_tld_suspeito(dominio: str, tlds_suspeitos: List[str]) -> Optional[str]:
+    dominio_partes = dominio.split('.')
+    if len(dominio_partes) > 1:
+        tld_candidato = dominio_partes[-1]
+        if tld_candidato in tlds_suspeitos:
+             return f"Domínio de nível superior (TLD) suspeito ou incomum: .{tld_candidato}"
     return None
 
-def verificar_dominio_recente(dominio: str, dias_limite: int = 30) -> str | None:
-    try:
-        info = whois.whois(dominio)
-        data_criacao = info.creation_date
-
-        if isinstance(data_criacao, list):
-            data_criacao = data_criacao[0]
-
-        if not data_criacao:
-            return None
-
-        dias_passados = (datetime.datetime.now() - data_criacao).days
-        if dias_passados <= dias_limite:
-            return f"Domínio criado há apenas {dias_passados} dias"
-        return None
-    except Exception:
-        return None
+def verificar_dominio_recente(dominio: str, dias_limite: int = 30) -> Optional[str]:
+    # whois foi removido. Esta função agora é um stub que retorna sempre None.
+    return None
     
-def verificar_encurtadores(url: str, dominio: str, encurtadores: list[str], expandir_url_func) -> str | None:
+def verificar_encurtadores(dominio: str, encurtadores: List[str]) -> Optional[str]:
     dominio = dominio.lower()
 
-    if any(encurtador in dominio for encurtador in encurtadores):
-        expandida = expandir_url_func(url)
-
-        if expandida:
-            return f"URL encurtada detectada ({dominio}), expandida para {expandida}"
-        else:
-            return f"URL encurtada detectada ({dominio}), não foi possível expandir"
+    if any(encurtador == dominio for encurtador in encurtadores):
+        return f"URL encurtada detectada ({dominio})"
     return None
 
-from urllib.parse import urlparse, parse_qs
 
-def verificar_parametros_longos(url: str, limite_tamanho: int = 100, limite_parametros: int = 5) -> str | None:
+def verificar_parametros_longos(url: str, limite_tamanho: int = 70, limite_parametros: int = 5) -> Optional[str]:
     try:
         parsed = urlparse(url)
         params = parse_qs(parsed.query)
