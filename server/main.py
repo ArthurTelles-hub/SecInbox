@@ -3,8 +3,6 @@ from flask import Flask, jsonify
 from flask_smorest import Api
 from dotenv import load_dotenv
 
-# Imports para o rate limiting
-# Utiliza o IP do usuário como base
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
@@ -12,11 +10,9 @@ from flask_limiter.util import get_remote_address
 from api.security_checker_routes import blp as SecurityCheckerBlueprint
 from api.status_routes import blp as StatusBlueprint
 
-# Carrega as variáveis de ambiente do arquivo .env
+# Carrega as variáveis de ambiente do arquivo .env(Quano eu tiver)
 load_dotenv()
 
-# CSRF protection não habilitada pois esta API é RESTful e stateless,
-# a autenticação é feita via tokens nos headers.
 app = Flask(__name__)
 
 # Configurações do Flask-Smorest para a documentação
