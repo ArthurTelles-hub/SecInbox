@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
+from flask_cors import CORS
+
 # Importa os Blueprints dos arquivos de rotas
 from api.security_checker_routes import blp as SecurityCheckerBlueprint
 from api.status_routes import blp as StatusBlueprint
@@ -14,6 +16,9 @@ from api.status_routes import blp as StatusBlueprint
 load_dotenv()
 
 app = Flask(__name__)
+
+FRONTEND_URL = os.getenv("FRONTEND_URL", "")
+CORS(app, resources={r"/*":{"origins": FRONTEND_URL}})
 
 # Configurações do Flask-Smorest para a documentação
 app.config["API_TITLE"] = "API SecureInbox"
