@@ -39,7 +39,11 @@ class AnalisarResource(MethodView):
 
         for input_text in input_list:
             resultado = analisar_texto(input_text, tipo=input_type)
+            
+            resultado["analysed_item"] = input_text
+            
             resultado = _garantir_consistencia_resultado(resultado)
+            
             resultados_finais.append(resultado)
             
         print(f"DEBUG: Lista de resultados antes da serialização: {resultados_finais}")
