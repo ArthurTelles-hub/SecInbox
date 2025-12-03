@@ -1,7 +1,6 @@
 from urllib.parse import urlparse, parse_qs, unquote
 from typing import List, Dict, Any
 
-# Importa as funções de utilidade local. expandir_url não é mais importado.
 from .utils import (
     carregar_lista,
     verificar_palavras_chave,
@@ -11,12 +10,12 @@ from .utils import (
     verificar_parametros_longos,
 )
 
+SUSPICIOUS = "suspicious"
+REASON = "reason"
+URL_ORIGINAL = "url_original"
+URL_DESTINO = "url_destino"
+
 def extrair_url_real(url: str) -> str:
-    """
-    Extrai o URL de destino real de URLs de redirecionamento ou pesquisa.
-    
-    Aplica 'unquote' para decodificar a URL (Correção de FN).
-    """
     try:
         parsed_url = urlparse(url)
         query_params = parse_qs(parsed_url.query)
@@ -30,7 +29,6 @@ def extrair_url_real(url: str) -> str:
         return url
 
 def verificar_whitelist(dominio: str, whitelist: List[str]) -> bool:
-    """Verifica se o domínio está na lista branca."""
     dominio = dominio.lower()
     
     for item in whitelist:
@@ -48,11 +46,20 @@ def analisar_url(url: str) -> Dict[str, Any]:
         dominio = parsed.netloc.lower()
 
         if not dominio:
-            return {"suspicious": True, "reason": "URL inválida ou sem domínio"}
+            return {
+                URL_ORIGINAL: url,
+                SUSPICIOUS: True, 
+                REASON: "URL inválida ou sem domínio"
+            }
 
         whitelist = carregar_lista("whitelist.txt")
         if verificar_whitelist(dominio, whitelist):
-            return {"suspicious": False, "reason": "Domínio na lista branca (Whitelist)"}
+            return {
+                URL_ORIGINAL: url,
+                URL_DESTINO: url_de_destino,
+                SUSPICIOUS: False, 
+                REASON: "Domínio na lista branca (Whitelist)"
+            }
 
         palavras_suspeitas = carregar_lista("palavras_suspeitas.txt")
         tlds_suspeitos = carregar_lista("tlds_suspeitos.txt")
@@ -75,10 +82,23 @@ def analisar_url(url: str) -> Dict[str, Any]:
                 heuristicas.append(resultado)
 
         if heuristicas:
-            return {"suspicious": True, "reason": "; ".join(heuristicas)}
+            return {
+                URL_ORIGINAL: url,
+                URL_DESTINO: url_de_destino,
+                SUSPICIOUS: True, 
+                REASON: "; ".join(heuristicas)
+            }
         else:
-            return {"suspicious": False, "reason": "Nenhum indicador de phishing encontrado"}
+            return {
+                URL_ORIGINAL: url,
+                URL_DESTINO: url_de_destino,
+                SUSPICIOUS: False, 
+                REASON: "Nenhum indicador de phishing encontrado"
+            }
 
     except Exception as e:
-
-        return {"suspicious": True, "reason": f"Erro fatal ao processar a URL: {str(e)}"}
+        return {
+            URL_ORIGINAL: url,
+            SUSPICIOUS: True, 
+            REASON: f"Erro fatal ao processar a URL: {type(e).__name__} - {str(e)}"
+        }
