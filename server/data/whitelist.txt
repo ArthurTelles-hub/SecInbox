@@ -73,3 +73,4 @@ webex.com
 avagrad.unievangelica.edu.br
 www4.unievangelica.edu.br
 portal.unievangelica.edu.br
+javascript: void(0)
